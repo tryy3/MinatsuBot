@@ -3,8 +3,6 @@ package helpplugin
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"strconv"
 
 	"strings"
@@ -17,7 +15,7 @@ import (
 )
 
 var (
-	Log minatsubot.Logger
+	log *minatsubot.Logger
 	Reg *regexp.Regexp
 )
 
@@ -25,11 +23,7 @@ type Help struct {
 }
 
 func (s Help) Init() {
-	Log = minatsubot.Logger{
-		Writers: []io.Writer{os.Stdout},
-		Prefix:  "HelpPlugin",
-		Level:   minatsubot.GetLoggingLevel(minatsubot.PluginAPI.GetSettings().Logging),
-	}
+	log = minatsubot.PluginAPI.GetLogger("HelpPlugin")
 	Reg = regexp.MustCompile("<command>")
 }
 

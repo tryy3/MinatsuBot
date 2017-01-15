@@ -4,15 +4,11 @@ import (
 	"sync"
 	"time"
 
-	"os"
-
-	"io"
-
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	Log       Logger
+	log       *Logger
 	PluginAPI *API
 )
 
@@ -23,11 +19,7 @@ func init() {
 			rmu: &sync.RWMutex{},
 		},
 	}
-	Log = Logger{
-		Writers: []io.Writer{os.Stdout},
-		Prefix:  "MinatsuBot",
-		Level:   InfoLevel,
-	}
+	log = newLogger("MinatsuBot", InfoLevel)
 }
 
 func NewBot(settings Settings) *Bot {
@@ -35,17 +27,18 @@ func NewBot(settings Settings) *Bot {
 	bot := &Bot{
 		Settings: settings,
 		Description: Description{
-			Version: &Version{"0", "0", "1"},
+			Version: &Version{"0", "1", "0"},
 			Author:  "tryy3",
 			Website: "google.com",
 			Info:    "Extensible Chat Bot",
 		},
 	}
 
-	Log.Level = GetLoggingLevel(bot.Settings.Logging)
+	log.level = getLoggingLevel(bot.Settings.Logging)
 	PluginAPI.bot = bot
 	PluginAPI.commandManager = &CommandManager{commands: []simplecommand{}}
-	PluginAPI.pluginManager = &PluginManager{plugins: map[string]*PluginInfo{}}
+	PluginAPI.pluginManager = &PluginManager{plugins: map[string]*simpleplugin{}}
+	PluginAPI.permission = &permissionManager{}
 
 	return bot
 }
@@ -62,27 +55,27 @@ func (b *Bot) AddPlugin(plugin Plugin, desc PluginDescription) {
 }
 
 func (b *Bot) Init() {
-	Log.Info("Initializing the Bot")
+	log.Info("Initializing the Bot")
 	b.Starttime = time.Now()
 
-	Log.Info("Initializing the CommandManager")
+	log.Info("Initializing the CommandManager")
 	PluginAPI.Event.AddHandler(PluginAPI.commandManager.handler)
 
-	Log.Info("Initializing the PluginManager")
+	log.Info("Initializing the PluginManager")
 	PluginAPI.pluginManager.init()
 
-	Log.Info("Creating a discord session")
+	log.Info("Creating a discord session")
 	discord, err := discordgo.New(b.Settings.Token)
 	if err != nil {
-		Log.Error("Error creating a Discord session,", err)
+		log.Error("Error creating a Discord session,", err)
 		PluginAPI.pluginManager.disable()
 		return
 	}
 
-	Log.Info("Gathering bot data")
+	log.Info("Gathering bot data")
 	user, err := discord.User("@me")
 	if err != nil {
-		Log.Error("Error obtaining account details,", err)
+		log.Error("Error obtaining account details,", err)
 		PluginAPI.pluginManager.disable()
 		return
 	}
@@ -93,10 +86,10 @@ func (b *Bot) Init() {
 	// Add a discord chat handler
 	discord.AddHandler(PluginAPI.Event.handler)
 
-	Log.Info("Opening discord connection")
+	log.Info("Opening discord connection")
 	err = discord.Open()
 	if err != nil {
-		Log.Error("Error oepning discord connection,", err)
+		log.Error("Error oepning discord connection,", err)
 		PluginAPI.pluginManager.disable()
 		return
 	}
@@ -104,7 +97,7 @@ func (b *Bot) Init() {
 	PluginAPI.Session = discord
 	PluginAPI.pluginManager.enable()
 
-	Log.Info("Bot is now running. Press CTRL-C to exit.")
+	log.Info("Bot is now running. Press CTRL-C to exit.")
 	<-make(chan struct{})
 	return
 }

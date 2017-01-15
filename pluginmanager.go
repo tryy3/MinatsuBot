@@ -1,32 +1,32 @@
 package minatsubot
 
 type PluginManager struct {
-	plugins map[string]*PluginInfo
+	plugins map[string]*simpleplugin
 }
 
 func (p *PluginManager) addPlugin(plugin Plugin, desc PluginDescription) {
 	if desc.Name == "" {
-		Log.Error("Trying to register a plugin with no name.")
+		log.Error("Trying to register a plugin with no name.")
 		return
 	}
 	if desc.Version.Get() == "" {
-		Log.Error("Trying to register a plugin with no version.")
+		log.Error("Trying to register a plugin with no version.")
 		return
 	}
 
 	if p.plugins[desc.Name] != nil {
-		Log.Errorf("There is already a plugin with the name %s registered.", desc.Name)
+		log.Errorf("There is already a plugin with the name %s registered.", desc.Name)
 		return
 	}
-	p.plugins[desc.Name] = &PluginInfo{
+	p.plugins[desc.Name] = &simpleplugin{
 		enabled:     false,
 		plugin:      plugin,
 		description: desc,
 	}
-	Log.Infof("Plugin %s has now been added.", desc.Name)
+	log.Infof("Plugin %s has now been added.", desc.Name)
 }
 
-func (p *PluginManager) getPlugin(name string) (*PluginInfo, bool) {
+func (p *PluginManager) getPlugin(name string) (*simpleplugin, bool) {
 	plugin, ok := p.plugins[name]
 	return plugin, ok
 }
@@ -38,7 +38,7 @@ func (p *PluginManager) getPluginDesc(name string) (PluginDescription, bool) {
 	return p.plugins[name].description, true
 }
 
-func (p *PluginManager) getAllPlugins() map[string]*PluginInfo {
+func (p *PluginManager) getAllPlugins() map[string]*simpleplugin {
 	return p.plugins
 }
 
@@ -53,25 +53,25 @@ func (p *PluginManager) getAllPluginsDesc() []PluginDescription {
 
 func (p *PluginManager) init() {
 	// Initialize all Plugins here
-	Log.Info("Initializing all plugins.")
+	log.Info("Initializing all plugins.")
 	for _, plugin := range p.plugins {
-		Log.Infof("Initializing %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("Initializing %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 		plugin.GetPlugin().Init()
-		Log.Infof("%s v%s initialized", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("%s v%s initialized", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 	}
 }
 
 func (p *PluginManager) enable() {
-	Log.Info("Enabling all plugins.")
+	log.Info("Enabling all plugins.")
 	for _, plugin := range p.plugins {
 		if plugin.IsEnabled() {
 			continue
 		}
 
-		Log.Infof("Enabling %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("Enabling %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 		plugin.GetPlugin().Enable()
 		plugin.enabled = true
-		Log.Infof("%s v%s enabled", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("%s v%s enabled", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 	}
 }
 
@@ -80,8 +80,8 @@ func (p *PluginManager) disable() {
 		if !plugin.IsEnabled() {
 			continue
 		}
-		Log.Infof("Disabling %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("Disabling %s v%s", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 		plugin.GetPlugin().Disable()
-		Log.Infof("%s v%s disabled", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
+		log.Infof("%s v%s disabled", plugin.GetDescription().Name, plugin.GetDescription().Version.Get())
 	}
 }

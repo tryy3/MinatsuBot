@@ -6,6 +6,7 @@ import (
 	"github.com/tryy3/minatsubot"
 	"github.com/tryy3/minatsubot/plugins/helpplugin"
 	"github.com/tryy3/minatsubot/plugins/infoplugin"
+	"github.com/tryy3/minatsubot/plugins/permissionmanager"
 )
 
 var (
@@ -37,6 +38,13 @@ func main() {
 
 	bot.AddPlugin(infoplugin.Info{}, minatsubot.PluginDescription{
 		Name: "InfoPlugin",
+		Description: minatsubot.Description{
+			Version: &minatsubot.Version{"0", "0", "1"},
+		},
+	})
+
+	bot.AddPlugin(permissionmanager.Permission{}, minatsubot.PluginDescription{
+		Name: "PermissionManager",
 		Description: minatsubot.Description{
 			Version: &minatsubot.Version{"0", "0", "1"},
 		},

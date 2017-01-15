@@ -1,9 +1,5 @@
 package minatsubot
 
-import (
-	"github.com/bwmarrin/discordgo"
-)
-
 type Settings struct {
 	Token   string
 	Prefix  string
@@ -37,19 +33,9 @@ func (v *Version) Get() string {
 	return v.Major + "." + v.Minor + "." + v.Patch
 }
 
-type Plugin interface {
-	Enable()
-	Init()
-	Disable()
-}
-
 type CommandDescription struct {
-	Name string
-	Aliases []string
+	Name        string
+	Aliases     []string
 	Description string
-	Usage string
-}
-
-type Command interface {
-	Run(command string, label string, args []string, message *discordgo.MessageCreate)
+	Usage       string
 }

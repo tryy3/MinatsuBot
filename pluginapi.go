@@ -9,6 +9,7 @@ type API struct {
 	bot            *Bot
 	pluginManager  *PluginManager
 	commandManager *CommandManager
+	permission     *permissionManager
 }
 
 // GetBotID Returns the bot id
@@ -27,7 +28,7 @@ func (api *API) RegisterCommand(desc CommandDescription, cmd Command) {
 }
 
 // GetPlugin Return a registered plugin
-func (api *API) GetPlugin(name string) (*PluginInfo, bool) {
+func (api *API) GetPlugin(name string) (*simpleplugin, bool) {
 	return api.pluginManager.getPlugin(name)
 }
 
@@ -37,7 +38,7 @@ func (api *API) GetPluginDesc(name string) (PluginDescription, bool) {
 }
 
 // GetAllPlugins Returns all existing plugins
-func (api *API) GetAllPlugins() map[string]*PluginInfo {
+func (api *API) GetAllPlugins() map[string]*simpleplugin {
 	return api.pluginManager.getAllPlugins()
 }
 
@@ -66,20 +67,31 @@ func (api *API) GetBotDescription() Description {
 	return api.bot.Description
 }
 
-type PluginInfo struct {
-	plugin      Plugin
-	enabled     bool
-	description PluginDescription
+// GetLogger Returns a new Logger
+func (api *API) GetLogger(name string) *Logger {
+	return newLogger(name, getLoggingLevel(api.GetSettings().Logging))
 }
 
-func (p PluginInfo) GetPlugin() Plugin {
-	return p.plugin
+// HasUserPermission Checks if the user has access to a certain permission.
+// If no PermissionHandler has been assigned, this will always return true.
+func (api *API) HasUserPermission(name, perm string) bool {
+	return api.permission.hasUserPermission(name, perm)
 }
 
-func (p PluginInfo) IsEnabled() bool {
-	return p.enabled
+// HasGroupPermission Checks if the group has access to a certain permission.
+// If no PermissionHandler has been assigned, this will always return true.
+func (api *API) HasGroupPermission(name, perm string) bool {
+	return api.permission.hasGroupPermission(name, perm)
 }
 
-func (p PluginInfo) GetDescription() PluginDescription {
-	return p.description
+// SetPermissionHandler Sets the bots PermissionHandler to handler.
+// Can only contain one PermissionHandler, so the return bool means
+// if it was able to set a PermissionHandler or not
+func (api *API) SetPermissionHandler(handler PermissionHandler) bool {
+	return api.permission.setPermissionHandler(handler)
+}
+
+// GetPermissionHandler Returns the bot PermissionHandler.
+func (api *API) GetPermissionHandler() PermissionHandler {
+	return api.permission.getManager()
 }

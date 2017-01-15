@@ -16,7 +16,7 @@ type EventHandler struct {
 func (e *EventHandler) validateHandler(handler interface{}) reflect.Type {
 	handlerType := reflect.TypeOf(handler)
 	if handlerType.NumIn() != 1 {
-		Log.Error("Unable to add event handler, handler must be of the type func(*minatsubot.EventType)")
+		log.Error("Unable to add event handler, handler must be of the type func(*minatsubot.EventType)")
 		return nil
 	}
 

@@ -2,8 +2,6 @@ package infoplugin
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -15,18 +13,14 @@ import (
 )
 
 var (
-	Log minatsubot.Logger
+	log *minatsubot.Logger
 )
 
 type Info struct {
 }
 
 func (i Info) Init() {
-	Log = minatsubot.Logger{
-		Writers: []io.Writer{os.Stdout},
-		Prefix:  "InfoPlugin",
-		Level:   minatsubot.GetLoggingLevel(minatsubot.PluginAPI.GetSettings().Logging),
-	}
+	log = minatsubot.PluginAPI.GetLogger("InfoPlugin")
 }
 
 func (i Info) Enable() {
@@ -60,7 +54,7 @@ func (i InfoCMD) Run(command string, label string, args []string, message *disco
 		)
 	} else {
 		sysMem = "Failed collecting memory information"
-		Log.Warn("Failed collecting memory information")
+		log.Warn("Failed collecting memory information")
 	}
 
 	description := minatsubot.PluginAPI.GetBotDescription()
